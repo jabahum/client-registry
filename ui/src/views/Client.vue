@@ -91,7 +91,7 @@
                       </v-list-item>
                       <v-list-item>
                         <v-list-item-content>
-                          Date Of Death:</v-list-item-content
+                          {{ $t("death_date") }}:</v-list-item-content
                         >
                         <v-list-item-content class="align-end">
                           "Not Set"
@@ -550,7 +550,7 @@ export default {
         },
         {
           text: this.$t("death_date"),
-          value: "deathdate",
+          value: "deathDate",
         },
         {
           text: this.$t("nationality"),
@@ -817,7 +817,7 @@ export default {
     breakMatch() {
       if (this.breaks.length > 0) {
         this.$store.state.progress.enable = true;
-        this.$store.state.progress.title = "Breaing Match";
+        this.$store.state.progress.title = "Breaking Match";
         let username = this.$store.state.auth.username;
         let url = `/ocrux/match/break-match?username=${username}`;
         let ids = [];
@@ -835,7 +835,7 @@ export default {
     revertBreak() {
       if (this.unbreaks.length > 0) {
         this.$store.state.progress.enable = true;
-        this.$store.state.progress.title = "UnBreaing Match";
+        this.$store.state.progress.title = "UnBreaking Match";
         let username = this.$store.state.auth.username;
         let url = `/ocrux/match/unbreak-match?username=${username}`;
         let ids = [];
