@@ -3,42 +3,17 @@
     <v-card-title>
       <v-spacer />
       <template v-for="filter in filters">
-        <searchTerm
-          :label="filter.label" 
-          :key="filter.searchparameter" 
-          :expression="filter.searchparameter" 
-          :binding="filter.binding"
-          @termChange="searchData"
-        />
+        <searchTerm :label="filter.label" :key="filter.searchparameter" :expression="filter.searchparameter"
+          :binding="filter.binding" @termChange="searchData" />
       </template>
-      <v-autocomplete
-        v-model="pos"
-        :items="$store.state.clients"
-        item-text="displayName"
-        item-value="id"
-        clearable
-        :label="$t('source')"
-        hide-details
-        outlined
-        shaped
-        @click:clear="searchPOS"
-        @change="searchPOS"
-      />
+      <v-autocomplete v-model="pos" :items="$store.state.clients" item-text="displayName" item-value="id" clearable
+        :label="$t('source')" hide-details outlined shaped @click:clear="searchPOS" @change="searchPOS" />
     </v-card-title>
-    <v-data-table
-      style="cursor: pointer"
-      :headers="headers"
-      :items="patients"
-      :options.sync="options"
-      :server-items-length="totalPatients"
-      :footer-props="{ 
-      'items-per-page-options': [5,10,20,50] ,
-      'items-per-page-text':this.$t('row_per_page')}"
-      :no-data-text="$t('no_data')"
-      :loading="loading"
-      class="elevation-1"
-      @click:row="clickIt"
-    />
+    <v-data-table style="cursor: pointer" :headers="headers" :items="patients" :options.sync="options"
+      :server-items-length="totalPatients" :footer-props="{
+        'items-per-page-options': [5, 10, 20, 50],
+        'items-per-page-text': this.$t('row_per_page'),
+      }" :no-data-text="$t('no_data')" :loading="loading" class="elevation-1" @click:row="clickIt" />
   </v-card>
 </template>
 
@@ -51,7 +26,10 @@ export const headersNames = {
   surname: 'Surname',
   gender: 'Gender',
   birth: 'Birth Date',
-  cruid :'CRUID'
+  registeringFacility: "Registering Facility",
+  nationalIDPassport: "National ID / Passport",
+  healthIdentificationNumber: "Health Identification Number",
+  cruid: 'CRUID'
 }
 
 export default {
@@ -88,7 +66,7 @@ export default {
     'searchTerm': searchTerm
   },
   methods: {
-    clickIt: function(client) {
+    clickIt: function (client) {
       this.$router.push({
         name: "client",
         params: { clientId: client.id },
@@ -96,23 +74,23 @@ export default {
       });
     },
     searchPOS() {
-      if(this.pos) {
+      if (this.pos) {
         this.searchData('_tag', 'http://openclientregistry.org/fhir/clientid|' + this.pos)
-      } else if(this.pos === null) {
+      } else if (this.pos === null) {
         this.searchData('_tag', [])
       }
     },
     searchData(expression, value) {
-      if(value === null || this.search_terms.indexOf(expression + '=' + encodeURIComponent(value)) !== -1 ) {
+      if (value === null || this.search_terms.indexOf(expression + '=' + encodeURIComponent(value)) !== -1) {
         return
       }
-      if(Array.isArray(value) && value.length === 0) {
-        for(let index in this.search_terms) {
-          if(this.search_terms[index].startsWith(expression + '=')) {
+      if (Array.isArray(value) && value.length === 0) {
+        for (let index in this.search_terms) {
+          if (this.search_terms[index].startsWith(expression + '=')) {
             this.search_terms.splice(index, 1)
           }
         }
-      } else if(expression) {
+      } else if (expression) {
         this.search_terms.push(
           expression + '=' + encodeURIComponent(value)
         )
@@ -163,12 +141,12 @@ export default {
         })
         this.headers = []
         this.filters = []
-        if(extension_report) {
+        if (extension_report) {
           let display = extension_report.extension && extension_report.extension.filter((display) => {
             return display.url === 'http://ihris.org/fhir/StructureDefinition/display'
           })
-          if(display) {
-            for(let disp of display) {
+          if (display) {
+            for (let disp of display) {
               let label = disp.extension && disp.extension.find((ext) => {
                 return ext.url === 'label'
               })
@@ -184,8 +162,8 @@ export default {
               let searchparameter = disp.extension && disp.extension.find((ext) => {
                 return ext.url === 'searchparameter'
               })
-          
-              let translatedHeader ;
+
+              let translatedHeader;
               if (label.valueString === headersNames.givenName) {
                 translatedHeader = this.$t('given_names');
               }
@@ -198,27 +176,34 @@ export default {
               if (label.valueString === headersNames.birth) {
                 translatedHeader = this.$t('birth_date');
               }
+              if (label.valueString === headersNames.registeringFacility) {
+                translatedHeader = this.$t('registering_facility');
+              } if (label.valueString === headersNames.nationalIDPassport) {
+                translatedHeader = this.$t('national_id_passport');
+              } if (label.valueString === headersNames.healthIdentificationNumber) {
+                translatedHeader = this.$t('health_identification_number');
+              }
               if (label.valueString === headersNames.cruid) {
                 translatedHeader = label.valueString;
               }
 
-              if(label && fhirpath) {
+              if (label && fhirpath) {
                 columns_info.push({
                   text: label.valueString,
                   fhirpath: fhirpath.valueString
                 })
                 this.headers.push({
-                  text: translatedHeader ? translatedHeader: label.valueString,
+                  text: translatedHeader ? translatedHeader : label.valueString,
                   value: label.valueString
                 })
               }
 
-              if(searchable && searchparameter) {
+              if (searchable && searchparameter) {
                 let filter = {
                   searchparameter: searchparameter.valueString,
-                  label: this.$t('search')+ "_" + translatedHeader ? translatedHeader: label.valueString
+                  label: this.$t('search') + "_" + translatedHeader ? translatedHeader : label.valueString
                 }
-                if(valueset && valueset.valueString) {
+                if (valueset && valueset.valueString) {
                   filter.binding = valueset.valueString
                 }
                 this.filters.push(filter)
@@ -272,12 +257,12 @@ export default {
                 id: entry.resource.id,
                 pos: systemName
               }
-              for(let col of columns_info) {
+              for (let col of columns_info) {
                 let val = this.$fhirpath.evaluate(entry.resource, col.fhirpath)
-                if(Array.isArray(val)) {
+                if (Array.isArray(val)) {
                   val = val.join(', ')
                 }
-                if(val.split('/').length === 2) {
+                if (val.split('/').length === 2) {
                   val = val.split('/')[1]
                 }
                 patient[col.text] = val
