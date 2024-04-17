@@ -126,15 +126,14 @@
                         </v-list-item-content>
                       </v-list-item>
                       <v-list-item>
-                        <v-list-item-content> Parish/Ward:</v-list-item-content>
+                        <v-list-item-content> Parish:</v-list-item-content>
                         <v-list-item-content class="align-end">
                           "Not Set"
                         </v-list-item-content>
                       </v-list-item>
                       <v-list-item>
                         <v-list-item-content
-                          >Sub County / Division / Town
-                          Council:</v-list-item-content
+                          >Sub County:</v-list-item-content
                         >
                         <v-list-item-content class="align-end">
                           "Not Set"
@@ -155,8 +154,7 @@
 
                       <v-list-item>
                         <v-list-item-content
-                          >Country of residence /Address of
-                          client:</v-list-item-content
+                          >Country of residence:</v-list-item-content
                         >
                         <v-list-item-content class="align-end">
                           "Not Set"
@@ -165,8 +163,7 @@
 
                       <v-list-item>
                         <v-list-item-content
-                          >Client Next of Kin (name, address, telephone numbers,
-                          relationship to client/patient):</v-list-item-content
+                          >Next of Kin :</v-list-item-content
                         >
                         <v-list-item-content class="align-end">
                           "Not Set"
