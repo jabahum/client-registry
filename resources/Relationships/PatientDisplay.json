@@ -114,15 +114,22 @@
           "extension": [
             {
               "url": "label",
-              "valueString": "Nationality"
+              "valueString": "Registering Facility"
             },
             {
               "url": "fhirpath",
               "valueString": "birthDate"
+            },
+            {
+              "url": "searchable",
+              "valueBoolean": true
+            },
+            {
+              "url": "searchparameter",
+              "valueString": "gender"
             }
           ]
         },
-        
         {
           "url": "http://ihris.org/fhir/StructureDefinition/display",
           "extension": [
@@ -134,7 +141,6 @@
               "url": "fhirpath",
               "valueString": "birthDate"
             }
-       
           ]
         },
         {
@@ -142,13 +148,12 @@
           "extension": [
             {
               "url": "label",
-              "valueString": "Parish/Ward"
+              "valueString": "Parish"
             },
             {
               "url": "fhirpath",
               "valueString": "birthDate"
             }
-     
           ]
         },
         {
@@ -156,7 +161,7 @@
           "extension": [
             {
               "url": "label",
-              "valueString": "Sub County / Division / Town Council"
+              "valueString": "Sub County"
             },
             {
               "url": "fhirpath",
@@ -188,7 +193,6 @@
               "url": "fhirpath",
               "valueString": "birthDate"
             }
-           
           ]
         },
         {
@@ -196,19 +200,11 @@
           "extension": [
             {
               "url": "label",
-              "valueString": "Registering Facility"
+              "valueString": "Nationality"
             },
             {
               "url": "fhirpath",
               "valueString": "birthDate"
-            },
-            {
-              "url": "searchable",
-              "valueBoolean": true
-            },
-            {
-              "url": "searchparameter",
-              "valueString": "gender"
             }
           ]
         },
@@ -219,7 +215,7 @@
               "url": "label",
               "valueString": "National ID / Passport"
             },
-             {
+            {
               "url": "fhirpath",
               "valueString": "name.where(use='official').last().family"
             },
@@ -251,27 +247,6 @@
             {
               "url": "searchparameter",
               "valueString": "gender"
-            }
-          ]
-        },
-        {
-          "url": "http://ihris.org/fhir/StructureDefinition/display",
-          "extension": [
-            {
-              "url": "label",
-              "valueString": "CRUID"
-            },
-            {
-              "url": "fhirpath",
-              "valueString": "link.where(type='refer').other.reference"
-            },
-            {
-              "url": "searchable",
-              "valueBoolean": true
-            },
-            {
-              "url": "searchparameter",
-              "valueString": "link"
             }
           ]
         }
