@@ -3,7 +3,8 @@
   "id": "patientreport",
   "meta": {
     "versionId": "1",
-    "lastUpdated": "2019-07-30T07:34:24.098+00:00",
+    "lastUpdated": "2020-09-16T18:44:08.834+03:00",
+    "source": "#TZD60hP95kHHSqj7",
     "profile": [
       "http://ihris.org/fhir/StructureDefinition/iHRISRelationship"
     ]
@@ -111,7 +112,6 @@
             }
           ]
         },
-          
         {
           "url": "http://ihris.org/fhir/StructureDefinition/iHRISReportElement",
           "extension": [
@@ -121,10 +121,11 @@
             },
             {
               "url": "name",
-              "valueString": "identifier.where(system='http://health.go.ug/cr/artnumber').value"
+              "valueString": "identifier.where(system='http://health.go.ug/cr/artnumber').last().value"
             }
           ]
-        },   {
+        },
+        {
           "url": "http://ihris.org/fhir/StructureDefinition/iHRISReportElement",
           "extension": [
             {
@@ -153,3 +154,4 @@
     "reference": "StructureDefinition/Patient"
   }
 }
+
