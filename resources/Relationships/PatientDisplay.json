@@ -217,7 +217,7 @@
             },
             {
               "url": "fhirpath",
-              "valueString": "name.where(use='official').last().family"
+              "valueString": "identifier.where(system='http://health.go.ug/cr/nationalid').last().value"
             },
             {
               "url": "searchable",
@@ -238,7 +238,7 @@
             },
             {
               "url": "fhirpath",
-              "valueString": "name.where(use='official').last().family"
+              "valueString": "identifier.where(system='http://health.go.ug/cr/hin').last().value"
             },
             {
               "url": "searchable",
