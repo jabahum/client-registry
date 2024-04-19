@@ -107,10 +107,11 @@
             },
             {
               "url": "name",
-              "valueString": "identifier.where(system='http://clientregistry.org/nationalid').last().value"
+              "valueString": "identifier.where(system='http://health.go.ug/cr/nationalid').last().value"
             }
           ]
         },
+          
         {
           "url": "http://ihris.org/fhir/StructureDefinition/iHRISReportElement",
           "extension": [
@@ -120,7 +121,19 @@
             },
             {
               "url": "name",
-              "valueString": "identifier.where(system='http://clientregistry.org/artnumber').value"
+              "valueString": "identifier.where(system='http://health.go.ug/cr/artnumber').value"
+            }
+          ]
+        },   {
+          "url": "http://ihris.org/fhir/StructureDefinition/iHRISReportElement",
+          "extension": [
+            {
+              "url": "label",
+              "valueString": "hin"
+            },
+            {
+              "url": "name",
+              "valueString": "identifier.where(system='http://health.go.ug/cr/hin').last().value"
             }
           ]
         }
