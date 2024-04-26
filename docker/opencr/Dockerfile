@@ -1,15 +1,18 @@
-FROM node:16-slim
+FROM node:erbium-slim
 
 RUN mkdir -p /var/log
 ARG branch=master
-RUN apt-get -qq update && apt-get install -y -qq git && apt-get install -y --no-install-recommends wget
-RUN git clone --branch ${branch} https://github.com/intrahealth/client-registry /src/
+RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
+RUN apt-get update && apt-get -y install git && apt-get -y install --no-install-recommends wget
+RUN git clone --branch ${branch} https://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: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@github.com/METS-Programme/client-registry /src/
 
 WORKDIR /src/server
 RUN npm install
 
-RUN cp /src/server/config/config_docker_template.json /src/server/config/config_docker.json
-RUN cp /src/server/config/config_cicd_template.json /src/server/config/config_cicd.json
+
+# RUN cp /src/server/config/config_docker_template.json /src/server/config/config_docker.json
+# RUN cp /src/server/config/mediator_template.json /src/server/config/mediator.json
+# RUN cp /src/server/config/config_cicd_template.json /src/server/config/config_cicd.json
 
 ARG NODE_ENV=docker
 ENV NODE_ENV=$NODE_ENV
@@ -21,7 +24,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 
 EXPOSE 3000
 
-ARG DEFAULT_HAPI_FHIR_URL=http://fhir:8080/fhir/metadata
+ARG DEFAULT_HAPI_FHIR_URL=http://localhost:8085/hapi-fhir-jpaserver/fhir/metadata
 ENV HAPI_FHIR_URL=$DEFAULT_HAPI_FHIR_URL
 
 ENTRYPOINT dockerize -wait-retry-interval 5s -timeout 60s -wait $HAPI_FHIR_URL node lib/app.js
