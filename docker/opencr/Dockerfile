@@ -4,7 +4,7 @@ RUN mkdir -p /var/log
 ARG branch=master
 RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
 RUN apt-get update && apt-get -y install git && apt-get -y install --no-install-recommends wget
-RUN git clone --branch ${branch} https://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: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@github.com/METS-Programme/client-registry /src/
+RUN git clone --branch ${branch} https://github.com/METS-Programme/client-registry.git /src/
 
 WORKDIR /src/server
 RUN npm install
