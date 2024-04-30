@@ -117,6 +117,19 @@
           "extension": [
             {
               "url": "label",
+              "valueString": "passport"
+            },
+            {
+              "url": "name",
+              "valueString": "identifier.where(system='http://health.go.ug/cr/passport').last().value"
+            }
+          ]
+        },
+        {
+          "url": "http://ihris.org/fhir/StructureDefinition/iHRISReportElement",
+          "extension": [
+            {
+              "url": "label",
               "valueString": "art"
             },
             {
@@ -154,4 +167,3 @@
     "reference": "StructureDefinition/Patient"
   }
 }
-
