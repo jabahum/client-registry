@@ -129,6 +129,19 @@
           "extension": [
             {
               "url": "label",
+              "valueString": "hin"
+            },
+            {
+              "url": "name",
+              "valueString": "identifier.where(system='http://clientregistry.org/hin').value"
+            }
+          ]
+        },
+        {
+          "url": "http://ihris.org/fhir/StructureDefinition/iHRISReportElement",
+          "extension": [
+            {
+              "url": "label",
               "valueString": "art"
             },
             {
