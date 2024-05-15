@@ -105,7 +105,7 @@
             },
             {
               "url": "fhirpath",
-              "valueString": "deceased"
+              "valueString": "deceasedDateTime"
             }
           ]
         },
