@@ -126,7 +126,7 @@
             },
             {
               "url": "searchparameter",
-              "valueString": "managingOrganization"
+              "valueString": "organization"
             }
           ]
         },
@@ -191,7 +191,11 @@
             },
             {
               "url": "fhirpath",
-              "valueString": "address.where(use='official').last()"
+              "valueString": "address.where(use='home').district"
+            },
+            {
+              "url": "searchparameter",
+              "valueString": "address:contains"
             }
           ]
         },
@@ -204,7 +208,11 @@
             },
             {
               "url": "fhirpath",
-              "valueString": "address:nationality"
+              "valueString": "address.where(use='home').country"
+            },
+            {
+              "url": "searchparameter",
+              "valueString": "address:contains"
             }
           ]
         },
