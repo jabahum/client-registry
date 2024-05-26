@@ -5,15 +5,9 @@ const logger = require("../winston");
 const config = require("../config");
 const env = process.env.NODE_ENV || "development";
 
-const generatePatientUniqueIdentifier = () => {
-  let uniqueNumber = "";
-  if (uniqueNumber) {
-    uniqueNumber = "UG";
-  }
-
-  uniqueNumber = "";
-
-  return uniqueNumber;
+const generatePatientUniqueIdentifier = (counter = 1000000) => {
+  const uniqueNumber = counter++;
+  return `UG-${uniqueNumber.toString().padStart(7, "0")}`;
 };
 
 const isMatchBroken = (resourceData, reference) => {
