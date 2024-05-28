@@ -5,10 +5,39 @@ const logger = require("../winston");
 const config = require("../config");
 const env = process.env.NODE_ENV || "development";
 
-const generatePatientUniqueIdentifier = (counter = 1000000) => {
-  const uniqueNumber = counter++;
-  return `UG-${uniqueNumber.toString().padStart(7, "0")}`;
+const createPatientIdentifierGenerator = (initialCounter = 1000000) => {
+  let counter = initialCounter;  // Initialize counter with the given starting value
+
+  // Function to calculate the Luhn check digit
+  const calculateCheckDigit = (number) => {
+    let sum = 0;
+    let shouldDouble = false;
+    for (let i = number.length - 1; i >= 0; i--) {
+      let digit = parseInt(number.charAt(i), 10);
+
+      if (shouldDouble) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+
+      sum += digit;
+      shouldDouble = !shouldDouble;
+    }
+
+    return (10 - (sum % 10)) % 10;
+  };
+
+  return () => {
+    const uniqueNumber = counter++;  // Increment counter after assigning it to uniqueNumber
+    const uniqueNumberStr = uniqueNumber.toString().padStart(7, "0");
+    const checkDigit = calculateCheckDigit(uniqueNumberStr);
+    return `UG-${uniqueNumberStr}${checkDigit}`;  // Append the check digit to the unique identifier
+  };
 };
+
+// Create an instance of the identifier generator
+const generatePatientUniqueIdentifier = createPatientIdentifierGenerator();
+
 
 const isMatchBroken = (resourceData, reference) => {
   let isBroken =

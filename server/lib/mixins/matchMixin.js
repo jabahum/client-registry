@@ -585,6 +585,7 @@ const addPatient = (clientID, patientsBundle, callback) => {
   const responseHeaders = {
     CRUID: [],
     patientID: [],
+    patientHIN: [],
   };
   const operationSummary = [];
   if (!clientID) {
@@ -917,6 +918,8 @@ const addPatient = (clientID, patientsBundle, callback) => {
             );
             responseHeaders.patientID.push(`Patient/${patient.id}`);
 
+            responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
+
             // if both patient and golden record doesnt exist then add them to avoid error when adding links
             const promise = new Promise((resolve, reject) => {
               if (newPatient) {
@@ -1182,6 +1185,9 @@ const addPatient = (clientID, patientsBundle, callback) => {
                   goldenRecord.resource.id
               );
               responseHeaders.patientID.push(`Patient/${patient.id}`);
+              
+              responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
+
               addLinks(patient, goldenRecord.resource);
               bundle.entry.push(
                 {
@@ -1369,7 +1375,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
               return nxtPatient();
             }
 
-        
             // update array element with generate HIN for new patients
             newPatient.resource.identifier = newPatient.resource.identifier.map(
               (identifier) => {
@@ -1395,14 +1400,12 @@ const addPatient = (clientID, patientsBundle, callback) => {
                   )
                 ) {
                   // create a new identifier of HIN
-                  return {
-                    system:
-                      config.get("systems:healthInformationNumber:uri"),
+                  return newPatient.resource.identifier.push({
+                    system: config.get("systems:healthInformationNumber:uri"),
                     value: generatePatientUniqueIdentifier(),
                     use: "usual",
-                  };
+                  });
                 }
-                return identifier;
               }
             );
 
@@ -1545,14 +1548,12 @@ const addPatient = (clientID, patientsBundle, callback) => {
                   )
                 ) {
                   // create a new identifier of HIN
-                  return {
-                    system:
-                      config.get("systems:healthInformationNumber:uri"),
+                  return newPatient.resource.identifier.push({
+                    system: config.get("systems:healthInformationNumber:uri"),
                     value: generatePatientUniqueIdentifier(),
                     use: "usual",
-                  };
+                  });
                 }
-                return identifier;
               }
             );
 

@@ -263,6 +263,7 @@ router.post('/', (req, res) => {
         }
       }
     }
+    res.setHeader('PatientHIN',JSON.stringify(results.patients.responseHeaders.patientHIN));
     res.setHeader('Location', JSON.stringify(results.patients.responseHeaders.patientID));
     res.setHeader('LocationCRUID', JSON.stringify(results.patients.responseHeaders.CRUID));
     res.status(code).json(filteredResponseBundle);
@@ -388,6 +389,7 @@ function saveResource(req, res) {
         if (error) {
           res.status(500).json(filteredResponseBundle);
         } else {
+          res.setHeader('PatientHIN',responseHeaders.patientHIN[0]);
           res.setHeader('Location', responseHeaders.patientID[0]);
           res.setHeader('LocationCRUID', responseHeaders.CRUID[0]);
           res.status(200).json(filteredResponseBundle);
