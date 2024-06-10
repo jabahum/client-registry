@@ -4,17 +4,14 @@ const fs = require("fs");
 const logger = require("../winston");
 const config = require("../config");
 const env = process.env.NODE_ENV || "development";
-const crypto = require("crypto");
 
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const initialCounterValue = config.get("uniqueIdentifier:IdentifierBase");
 
-const createPatientIdentifierGenerator = (initialCounter = 1000000) => {
-  let counter = initialCounter; // Initialize counter with the given starting value
+const UniqueIdentifierPrefix = config.get("uniqueIdentifier:Prefix");
 
-  // hash the number
-  function hashValue(value) {
-    return crypto.createHash("sha256").update(value).digest("hex");
-  }
+const identifierLength = parseInt(config.get("uniqueIdentifier:Length"), 10);
+
+const createPatientIdentifierGenerator = (initialCounter) => {
   // Function to calculate the Luhn check digit
   function calculateAlphabetCheckDigit(number) {
     let sum = 0;
@@ -39,19 +36,21 @@ const createPatientIdentifierGenerator = (initialCounter = 1000000) => {
     const checkDigitIndex = sum % 26;
 
     // Map the check digit index to an alphabet character
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return alphabet[checkDigitIndex];
   }
+
   return () => {
-    const uniqueNumber = counter++; // Increment counter after assigning it to uniqueNumber
-    const uniqueNumberStr = uniqueNumber.toString().padStart(7, "0");
+    const uniqueNumber = initialCounter++; // Increment initialCounter after assigning it to uniqueNumber
+    const uniqueNumberStr = uniqueNumber.toString().padStart(identifierLength, "0");
     const checkDigit = calculateAlphabetCheckDigit(uniqueNumberStr);
-    const hashedValue = hashValue(uniqueNumberStr);
-    return `UG-${hashedValue}${checkDigit}`; // Append the check digit to the unique identifier
+    return `${UniqueIdentifierPrefix}-${uniqueNumberStr}${checkDigit}`; // Append the check digit to the unique identifier
   };
 };
 
-// Create an instance of the identifier generator
-const generatePatientUniqueIdentifier = createPatientIdentifierGenerator();
+// Create an instance of the identifier generator with an external counter value
+const generatePatientUniqueIdentifier = createPatientIdentifierGenerator(initialCounterValue);
+
 
 const isMatchBroken = (resourceData, reference) => {
   let isBroken =

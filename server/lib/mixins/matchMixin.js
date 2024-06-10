@@ -31,6 +31,8 @@ const humanAdjudURI = URI("http://openclientregistry.org/fhir")
 const processingPatients = [];
 let reprocessing_running = false;
 
+let counterIndex = config.get("uniqueIdentifier:IdentifierBase") || 1000000;
+
 function closeCSVAuditEvent(event) {
   let eventCopy = lodash.cloneDeep(event);
   event.entity = [];
@@ -457,6 +459,8 @@ function saveCSVUploadAudiEvent(csvCode) {
   });
 }
 function createAddPatientAudEvent(operationSummary, req) {
+  logger.error(JSON.stringify(operationSummary, 0, 2));
+
   const auditBundle = {};
   auditBundle.type = "batch";
   auditBundle.resourceType = "Bundle";
@@ -508,12 +512,39 @@ function createAddPatientAudEvent(operationSummary, req) {
       auditEvent.outcomeDesc = "Success";
     }
     auditEvent.entity = [];
+    // add cruid
     if (operSummary.cruid && operSummary.cruid.length > 0) {
       for (const cruid of operSummary.cruid) {
         auditEvent.entity.push({
           name: "CRUID",
           what: {
             reference: cruid,
+          },
+        });
+      }
+    }
+    // add counter check
+    // if (operSummary.internalID && operSummary.internalID.length > 0) {
+    //   for (const internalId of operSummary.internalID) {
+    //     auditEvent.entity.push({
+    //       name: "InternalID",
+    //       what: {
+    //         reference: `Patient/${internalId}`,
+    //       },
+    //     });
+    //   }
+    // }
+
+    // add GeneratedUniqueIdentifier
+    if (
+      operSummary.generatedUniqueIdentifier &&
+      operSummary.generatedUniqueIdentifier.length > 0
+    ) {
+      for (const identifier of operSummary.generatedUniqueIdentifier) {
+        auditEvent.entity.push({
+          name: "GeneratedUniqueIdentifier",
+          what: {
+            reference: `Patient/${identifier}`,
           },
         });
       }
@@ -918,7 +949,7 @@ const addPatient = (clientID, patientsBundle, callback) => {
             );
             responseHeaders.patientID.push(`Patient/${patient.id}`);
 
-            responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
+            // responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
 
             // if both patient and golden record doesnt exist then add them to avoid error when adding links
             const promise = new Promise((resolve, reject) => {
@@ -1185,8 +1216,8 @@ const addPatient = (clientID, patientsBundle, callback) => {
                   goldenRecord.resource.id
               );
               responseHeaders.patientID.push(`Patient/${patient.id}`);
-              
-              responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
+
+              // responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
 
               addLinks(patient, goldenRecord.resource);
               bundle.entry.push(
@@ -1253,6 +1284,8 @@ const addPatient = (clientID, patientsBundle, callback) => {
         operSummary.csvCode = csvCode.code;
       }
       operSummary.cruid = [];
+      operSummary.internalID = [];
+      operSummary.generatedUniqueIdentifier = [];
       const bundle = {};
       bundle.type = "batch";
       bundle.resourceType = "Bundle";
@@ -1354,6 +1387,27 @@ const addPatient = (clientID, patientsBundle, callback) => {
               }
             }
 
+            // generate Internal ID
+            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
+
+            if(!internalID){
+
+              operSummary.outcome = "4";
+              operSummary.outcomeDesc =
+                "Patient resource has no internal id registered by client registry";
+              operationSummary.push(operSummary);
+              logger.error(
+                "Patient resource has no internal id, stop processing"
+              );
+              deleteProcess(processID);
+              return nxtPatient();
+            }
+
+            let counter = counterIndex++;
+
+            operSummary.internalID.push(counter);
+            
+
             const healthId =
               newPatient.resource.identifier &&
               newPatient.resource.identifier.find((identifier) => {
@@ -1387,6 +1441,11 @@ const addPatient = (clientID, patientsBundle, callback) => {
                     identifier.value === undefined ||
                     identifier.value === ""
                   ) {
+
+              
+                    operSummary.generatedUniqueIdentifier.push(
+                      generatePatientUniqueIdentifier()
+                    );
                     return {
                       ...identifier,
                       value: generatePatientUniqueIdentifier(),
@@ -1399,6 +1458,9 @@ const addPatient = (clientID, patientsBundle, callback) => {
                       config.get("systems:healthInformationNumber:uri")
                   )
                 ) {
+                  operSummary.generatedUniqueIdentifier.push(
+                    generatePatientUniqueIdentifier()
+                  ); // generatePatientUniqueIdentifier()
                   // create a new identifier of HIN
                   return newPatient.resource.identifier.push({
                     system: config.get("systems:healthInformationNumber:uri"),
@@ -1502,6 +1564,28 @@ const addPatient = (clientID, patientsBundle, callback) => {
               }
             }
 
+             // generate Internal ID
+            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
+
+            if(!internalID){
+
+              operSummary.outcome = "4";
+              operSummary.outcomeDesc =
+                "Patient resource has no internal id registered by client registry";
+              operationSummary.push(operSummary);
+              logger.error(
+                "Patient resource has no internal id, stop processing"
+              );
+              deleteProcess(processID);
+              return nxtPatient();
+            }
+
+
+            let counter = counterIndex++;
+
+            operSummary.internalID.push(counter);
+
+
             const healthId =
               newPatient.resource.identifier &&
               newPatient.resource.identifier.find((identifier) => {
@@ -1535,6 +1619,10 @@ const addPatient = (clientID, patientsBundle, callback) => {
                     identifier.value === undefined ||
                     identifier.value === ""
                   ) {
+                    operSummary.generatedUniqueIdentifier.push(
+                      generatePatientUniqueIdentifier()
+                    ); // generatePatientUniqueIdentifier()
+
                     return {
                       ...identifier,
                       value: generatePatientUniqueIdentifier(),
@@ -1547,6 +1635,10 @@ const addPatient = (clientID, patientsBundle, callback) => {
                       config.get("systems:healthInformationNumber:uri")
                   )
                 ) {
+                  operSummary.generatedUniqueIdentifier.push(
+                    generatePatientUniqueIdentifier()
+                  ); // generatePatientUniqueIdentifier()
+
                   // create a new identifier of HIN
                   return newPatient.resource.identifier.push({
                     system: config.get("systems:healthInformationNumber:uri"),

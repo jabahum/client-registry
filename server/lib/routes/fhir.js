@@ -389,7 +389,7 @@ function saveResource(req, res) {
         if (error) {
           res.status(500).json(filteredResponseBundle);
         } else {
-          res.setHeader('PatientHIN',responseHeaders.patientHIN[0]);
+          // res.setHeader('PatientHIN',responseHeaders.patientHIN[0]);
           res.setHeader('Location', responseHeaders.patientID[0]);
           res.setHeader('LocationCRUID', responseHeaders.CRUID[0]);
           res.status(200).json(filteredResponseBundle);
