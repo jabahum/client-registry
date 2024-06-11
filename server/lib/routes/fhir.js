@@ -271,8 +271,16 @@ router.post('/', (req, res) => {
     const auditBundle = matchMixin.createAddPatientAudEvent(results.patients.operationSummary, req);
     fhirWrapper.saveResource({
       resourceData: auditBundle
-    }, () => {
-      logger.info('Audit saved successfully');
+    }, (body) => {
+         if(body.resourceType === "Bundle" ) {
+          if (body.entry && body.entry.length > 0) {
+            if(body.entry[0].response.resourceType === "OperationOutcome") {
+              logger.info('A response with errors was received'+JSON.stringify(body,0,2));
+            } else {
+              logger.info('Audit saved successfully');
+            }
+          }
+        }
     });
 
     let csvUploadAuditBundle = {
@@ -367,8 +375,17 @@ function saveResource(req, res) {
       const auditBundle = matchMixin.createAddPatientAudEvent(operationSummary, req);
       fhirWrapper.saveResource({
         resourceData: auditBundle
-      }, () => {
-        logger.info('Audit saved successfully');
+      }, (error,body) => {
+       if(body.resourceType === "Bundle" ) {
+          if (body.entry && body.entry.length > 0) {
+            if(body.entry[0].response.resourceType === "OperationOutcome") {
+              logger.info('A response with errors was received'+JSON.stringify(body,0,2));
+            } else {
+              logger.info('Audit saved successfully');
+            }
+          }
+        }
+
         let filteredResponseBundle = [];
         for(let entry of responseBundle.entry) {
           let exists = filteredResponseBundle.findIndex((fil) => {

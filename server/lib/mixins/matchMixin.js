@@ -459,7 +459,7 @@ function saveCSVUploadAudiEvent(csvCode) {
   });
 }
 function createAddPatientAudEvent(operationSummary, req) {
-  logger.error(JSON.stringify(operationSummary, 0, 2));
+  // logger.error(JSON.stringify(operationSummary, 0, 2));
 
   const auditBundle = {};
   auditBundle.type = "batch";
@@ -512,6 +512,7 @@ function createAddPatientAudEvent(operationSummary, req) {
       auditEvent.outcomeDesc = "Success";
     }
     auditEvent.entity = [];
+
     // add cruid
     if (operSummary.cruid && operSummary.cruid.length > 0) {
       for (const cruid of operSummary.cruid) {
@@ -523,19 +524,16 @@ function createAddPatientAudEvent(operationSummary, req) {
         });
       }
     }
-    // logger.info(operSummary.internalID);
-    // // // add counter check
-    // if (operSummary.internalID && operSummary.internalID.length > 0) {
-      
-    //   for (const internalId of operSummary.internalID) {
-    //     auditEvent.entity.push({
-    //       name: "InternalID",
-    //       what: {
-    //         reference: `Patient/${internalId}`,
-    //       },
-    //     });
-    //   }
-    // }
+
+    // Add internalID
+    if (operSummary.internalID && operSummary.internalID.length > 0) {
+      for (const internalID of operSummary.internalID) {
+        auditEvent.entity.push({
+          name: "InternalID",
+          description: internalID,
+        });
+      }
+    }
 
     // add GeneratedUniqueIdentifier
     if (
@@ -1410,11 +1408,12 @@ const addPatient = (clientID, patientsBundle, callback) => {
               return nxtPatient();
             }
 
-                  // generate Internal ID
-            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
+            // generate Internal ID
+            const internalID = config
+              .get("systems:internalid:uri")
+              .find((id) => id === "http://health.go.ug/cr/internalid");
 
-            if(!internalID){
-
+            if (!internalID) {
               operSummary.outcome = "4";
               operSummary.outcomeDesc =
                 "Patient resource has no internal id registered by client registry";
@@ -1442,8 +1441,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
                     identifier.value === undefined ||
                     identifier.value === ""
                   ) {
-
-              
                     operSummary.generatedUniqueIdentifier.push(
                       generatePatientUniqueIdentifier()
                     );
@@ -1471,8 +1468,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
                 }
               }
             );
-
-       
 
             operSummary.submittedResource = newPatient.resource;
             findMatches(
@@ -1588,12 +1583,12 @@ const addPatient = (clientID, patientsBundle, callback) => {
               return nxtPatient();
             }
 
+            // generate Internal ID
+            const internalID = config
+              .get("systems:internalid:uri")
+              .find((id) => id === "http://health.go.ug/cr/internalid");
 
-              // generate Internal ID
-            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
-
-            if(!internalID){
-
+            if (!internalID) {
               operSummary.outcome = "4";
               operSummary.outcomeDesc =
                 "Patient resource has no internal id registered by client registry";
@@ -1604,7 +1599,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
               deleteProcess(processID);
               return nxtPatient();
             }
-
 
             let counter = counterIndex++;
 
@@ -1651,8 +1645,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
                 }
               }
             );
-
-
 
             let adjudTag =
               existingPatient.resource.meta &&
