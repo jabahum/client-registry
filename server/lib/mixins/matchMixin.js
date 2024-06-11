@@ -523,8 +523,10 @@ function createAddPatientAudEvent(operationSummary, req) {
         });
       }
     }
-    // add counter check
+    // logger.info(operSummary.internalID);
+    // // // add counter check
     // if (operSummary.internalID && operSummary.internalID.length > 0) {
+      
     //   for (const internalId of operSummary.internalID) {
     //     auditEvent.entity.push({
     //       name: "InternalID",
@@ -1387,27 +1389,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
               }
             }
 
-            // generate Internal ID
-            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
-
-            if(!internalID){
-
-              operSummary.outcome = "4";
-              operSummary.outcomeDesc =
-                "Patient resource has no internal id registered by client registry";
-              operationSummary.push(operSummary);
-              logger.error(
-                "Patient resource has no internal id, stop processing"
-              );
-              deleteProcess(processID);
-              return nxtPatient();
-            }
-
-            let counter = counterIndex++;
-
-            operSummary.internalID.push(counter);
-            
-
             const healthId =
               newPatient.resource.identifier &&
               newPatient.resource.identifier.find((identifier) => {
@@ -1428,6 +1409,26 @@ const addPatient = (clientID, patientsBundle, callback) => {
               deleteProcess(processID);
               return nxtPatient();
             }
+
+                  // generate Internal ID
+            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
+
+            if(!internalID){
+
+              operSummary.outcome = "4";
+              operSummary.outcomeDesc =
+                "Patient resource has no internal id registered by client registry";
+              operationSummary.push(operSummary);
+              logger.error(
+                "Patient resource has no internal id, stop processing"
+              );
+              deleteProcess(processID);
+              return nxtPatient();
+            }
+
+            let counter = counterIndex++;
+
+            operSummary.internalID.push(counter);
 
             // update array element with generate HIN for new patients
             newPatient.resource.identifier = newPatient.resource.identifier.map(
@@ -1470,6 +1471,8 @@ const addPatient = (clientID, patientsBundle, callback) => {
                 }
               }
             );
+
+       
 
             operSummary.submittedResource = newPatient.resource;
             findMatches(
@@ -1564,28 +1567,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
               }
             }
 
-             // generate Internal ID
-            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
-
-            if(!internalID){
-
-              operSummary.outcome = "4";
-              operSummary.outcomeDesc =
-                "Patient resource has no internal id registered by client registry";
-              operationSummary.push(operSummary);
-              logger.error(
-                "Patient resource has no internal id, stop processing"
-              );
-              deleteProcess(processID);
-              return nxtPatient();
-            }
-
-
-            let counter = counterIndex++;
-
-            operSummary.internalID.push(counter);
-
-
             const healthId =
               newPatient.resource.identifier &&
               newPatient.resource.identifier.find((identifier) => {
@@ -1606,6 +1587,28 @@ const addPatient = (clientID, patientsBundle, callback) => {
               deleteProcess(processID);
               return nxtPatient();
             }
+
+
+              // generate Internal ID
+            const internalID  =  config.get("systems:internalid:uri").find((id)=>id === "http://health.go.ug/cr/internalid" );
+
+            if(!internalID){
+
+              operSummary.outcome = "4";
+              operSummary.outcomeDesc =
+                "Patient resource has no internal id registered by client registry";
+              operationSummary.push(operSummary);
+              logger.error(
+                "Patient resource has no internal id, stop processing"
+              );
+              deleteProcess(processID);
+              return nxtPatient();
+            }
+
+
+            let counter = counterIndex++;
+
+            operSummary.internalID.push(counter);
 
             // update array element with generate HIN for new patients
             newPatient.resource.identifier = newPatient.resource.identifier.map(
@@ -1648,6 +1651,8 @@ const addPatient = (clientID, patientsBundle, callback) => {
                 }
               }
             );
+
+
 
             let adjudTag =
               existingPatient.resource.meta &&
