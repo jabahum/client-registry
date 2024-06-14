@@ -11,7 +11,7 @@
     "api": {
       "username": "root@openhim.org",
       "password": "password",
-      "apiURL": "https://mediator-api-staging.health.go.ug/",
+      "apiURL": "https://mediator-api-staging.health.go.ug",
       "trustSelfSigned": true,
       "urn": ""
     },
@@ -21,12 +21,12 @@
     "patientReprocessing": "0 21 * * *"
   },
   "fhirServer": {
-    "baseURL": "http://localhost:8080/hapi-fhir-jpaserver/fhir",
+    "baseURL": "http://client-fhir:8080/hapi-fhir-jpaserver/fhir",
     "username": "hapi",
     "password": "hapi"
   },
   "elastic": {
-    "server": "http://localhost:9200",
+    "server": "http://client-es:9200",
     "username": "",
     "password": "",
     "max_compilations_rate": "10000/1m",
