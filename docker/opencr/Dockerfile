@@ -1,4 +1,4 @@
-FROM node:21-slim
+FROM node:slim
 
 RUN mkdir -p /var/log
 ARG branch=config-payload
@@ -8,8 +8,8 @@ RUN git clone --branch ${branch} https://github.com/jabahum/client-registry /src
 WORKDIR /src/server
 RUN npm install
 
-#RUN cp /src/server/config/config_docker_template.json /src/server/config/config_docker.json
-#RUN cp /src/server/config/config_cicd_template.json /src/server/config/config_cicd.json
+RUN cp /src/server/config/config_docker_template.json /src/server/config/config_docker.json
+RUN cp /src/server/config/mediator.json /src/server/config/mediator.json
 
 ARG NODE_ENV=docker
 ENV NODE_ENV=$NODE_ENV
