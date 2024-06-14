@@ -101,6 +101,8 @@
     "assign_new_cr_id": "Assign to a new CR ID",
     "new_cr_id": "New CR ID",
     "original_cr_id": "Original CR ID",
+    "new_hin": "New HIN",
+    "old_hin": "Original HIN",
     "full_view": "Full view",
     "phone": "Phone",
     "loading_potential": "Loading potential matches",
