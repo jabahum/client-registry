@@ -1,4 +1,4 @@
-FROM node:16-slim
+FROM node:21-slim
 
 RUN mkdir -p /var/log
 ARG branch=config-payload
