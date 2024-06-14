@@ -21,7 +21,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 
 EXPOSE 3000
 
-ARG DEFAULT_HAPI_FHIR_URL=http://clientfhir:7080/hapi-fhir-jpaserver/fhir/metadata
+ARG DEFAULT_HAPI_FHIR_URL=http://client-fhir:8080/hapi-fhir-jpaserver/fhir/metadata
 ENV HAPI_FHIR_URL=$DEFAULT_HAPI_FHIR_URL
 
 ENTRYPOINT dockerize -wait-retry-interval 5s -timeout 60s -wait $HAPI_FHIR_URL node lib/app.js
