@@ -27,7 +27,6 @@ export const headersNames = {
   gender: "Gender",
   birth: "Birth Date",
   registeringFacility: "Registering Facility",
-  artNumber: "Art Number",
   nationalID: "National ID",
   passport: "Passport",
   healthIdentificationNumber: "Health Identification Number",
@@ -212,9 +211,6 @@ export default {
                 if (label.valueString === headersNames.nationalID) {
                   translatedHeader = this.$t("national_id");
                 }
-                 if (label.valueString === headersNames.artNumber) {
-                  translatedHeader = this.$t("art_number");
-                }
                 if (label.valueString === headersNames.passport) {
                   translatedHeader = this.$t("passport");
                 }
@@ -224,6 +220,9 @@ export default {
                   translatedHeader = this.$t("health_identification_number");
                 }
 
+                if (label.valueString === headersNames.cruid) {
+                  translatedHeader = label.valueString;
+                }
                 if (label && fhirpath) {
                   columns_info.push({
                     text: label.valueString,
@@ -278,12 +277,12 @@ export default {
                 if (!name) {
                   name = {};
                 }
-                let nin = entry.resource.identifier.find(
-                  (id) => id.system === process.env.VUE_APP_SYSTEM_NIN
-                );
-                if (!nin) {
-                  nin = {};
-                }
+                // let nin = entry.resource.identifier.find(
+                //   (id) => id.system === process.env.VUE_APP_SYSTEM_NIN
+                // );
+                // if (!nin) {
+                //   nin = {};
+                // }
                 let clientUserId;
                 if (entry.resource.meta && entry.resource.meta.tag) {
                   for (let tag of entry.resource.meta.tag) {

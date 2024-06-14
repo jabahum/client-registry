@@ -696,6 +696,7 @@ const addPatient = (clientID, patientsBundle, callback) => {
     if (currentLinks.length > 0) {
       currentGoldenLink = currentLinks[0].resource.id;
     }
+
     matchingTool.performMatch(
       {
         sourceResource: patient,
@@ -948,8 +949,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
               goldenRecord.resourceType + "/" + goldenRecord.id
             );
             responseHeaders.patientID.push(`Patient/${patient.id}`);
-
-            // responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
 
             // if both patient and golden record doesnt exist then add them to avoid error when adding links
             const promise = new Promise((resolve, reject) => {
@@ -1217,8 +1216,6 @@ const addPatient = (clientID, patientsBundle, callback) => {
               );
               responseHeaders.patientID.push(`Patient/${patient.id}`);
 
-              // responseHeaders.patientHIN.push(`${patient.identifier.find((item)=>item.system === config.get("systems:healthInformationNumber:uri")).value}`);
-
               addLinks(patient, goldenRecord.resource);
               bundle.entry.push(
                 {
@@ -1429,45 +1426,154 @@ const addPatient = (clientID, patientsBundle, callback) => {
 
             operSummary.internalID.push(counter);
 
-            // update array element with generate HIN for new patients
-            newPatient.resource.identifier = newPatient.resource.identifier.map(
-              (identifier) => {
+            const updateIdentifier = async (identifier) => {
+              if (
+                identifier.system ===
+                config.get("systems:healthInformationNumber:uri")
+              ) {
                 if (
-                  identifier.system ===
-                  config.get("systems:healthInformationNumber:uri")
+                  identifier.value === "null" ||
+                  identifier.value === undefined ||
+                  identifier.value === ""
                 ) {
-                  if (
-                    identifier.value === "null" ||
-                    identifier.value === undefined ||
-                    identifier.value === ""
-                  ) {
-                    operSummary.generatedUniqueIdentifier.push(
-                      generatePatientUniqueIdentifier()
+                  const query = "_sort=-_lastUpdated&_count=1";
+                  try {
+                    const resource = await new Promise((resolve, reject) => {
+                      fhirWrapper.getResource(
+                        {
+                          resource: "AuditEvent",
+                          query,
+                          noCaching: true,
+                        },
+                        (resource, statusCode) => {
+                          if (statusCode === 200) {
+                            resolve(resource);
+                          } else {
+                            reject(
+                              new Error(
+                                `Failed to fetch resource: ${statusCode}`
+                              )
+                            );
+                          }
+                        }
+                      );
+                    });
+
+                    if (
+                      resource.entry[0] &&
+                      resource.entry[0].resource &&
+                      resource.entry[0].resource.entity &&
+                      resource.entry[0].resource.entity.length > 0
+                    ) {
+                      const internalId = parseInt(
+                        resource.entry[0].resource.entity.find(
+                          (item) => item.name === "InternalID"
+                        ).description
+                      );
+                      const newIdentifier =
+                        generatePatientUniqueIdentifier(internalId);
+                      operSummary.generatedUniqueIdentifier.push(newIdentifier);
+                      return {
+                        ...identifier,
+                        value: newIdentifier,
+                      };
+                    } else if (resource.entry && resource.entry.length === 0) {
+                      const newIdentifier = generatePatientUniqueIdentifier();
+                      operSummary.generatedUniqueIdentifier.push(newIdentifier);
+                      return {
+                        ...identifier,
+                        value: newIdentifier,
+                      };
+                    }
+                  } catch (error) {
+                    console.error("Error updating identifier:", error);
+                    return identifier;
+                  }
+                }
+              } else if (
+                !newPatient.resource.identifier.find(
+                  (id) =>
+                    id.system ===
+                    config.get("systems:healthInformationNumber:uri")
+                )
+              ) {
+                const query = "_sort=-_lastUpdated&_count=1";
+                try {
+                  const resource = await new Promise((resolve, reject) => {
+                    fhirWrapper.getResource(
+                      {
+                        resource: "AuditEvent",
+                        query,
+                        noCaching: true,
+                      },
+                      (resource, statusCode) => {
+                        if (statusCode === 200) {
+                          resolve(resource);
+                        } else {
+                          reject(
+                            new Error(`Failed to fetch resource: ${statusCode}`)
+                          );
+                        }
+                      }
                     );
+                  });
+
+                  if (
+                    resource.entry[0] &&
+                    resource.entry[0].resource &&
+                    resource.entry[0].resource.entity &&
+                    resource.entry[0].resource.entity.length > 0
+                  ) {
+                    const internalId = parseInt(
+                      resource.entry[0].resource.entity.find(
+                        (item) => item.name === "InternalID"
+                      ).description
+                    );
+                    const newIdentifier =
+                      generatePatientUniqueIdentifier(internalId);
+                    operSummary.generatedUniqueIdentifier.push(newIdentifier);
                     return {
                       ...identifier,
-                      value: generatePatientUniqueIdentifier(),
+                      value: newIdentifier,
+                    };
+                  } else if (resource.entry && resource.entry.length === 0) {
+                    const newIdentifier = generatePatientUniqueIdentifier();
+                    operSummary.generatedUniqueIdentifier.push(newIdentifier);
+                    return {
+                      ...identifier,
+                      value: newIdentifier,
                     };
                   }
-                } else if (
-                  !newPatient.resource.identifier.find(
-                    (id) =>
-                      id.system ===
-                      config.get("systems:healthInformationNumber:uri")
-                  )
-                ) {
-                  operSummary.generatedUniqueIdentifier.push(
-                    generatePatientUniqueIdentifier()
-                  ); // generatePatientUniqueIdentifier()
-                  // create a new identifier of HIN
-                  return newPatient.resource.identifier.push({
-                    system: config.get("systems:healthInformationNumber:uri"),
-                    value: generatePatientUniqueIdentifier(),
-                    use: "usual",
-                  });
+                } catch (error) {
+                  console.error("Error updating identifier:", error);
+                  return identifier;
                 }
               }
-            );
+              return identifier;
+            };
+
+            const updateIdentifiers = async () => {
+              const updatedIdentifiers = await Promise.all(
+                newPatient.resource.identifier.map(updateIdentifier)
+              );
+              newPatient.resource.identifier = updatedIdentifiers;
+            };
+
+            // Call the function to update the identifiers
+            updateIdentifiers()
+              .then(() => {
+                console.log(
+                  "Identifiers updated:",
+                  newPatient.resource.identifier
+                );
+                console.log(
+                  "Generated Unique Identifiers:",
+                  operSummary.generatedUniqueIdentifier
+                );
+              })
+              .catch((error) => {
+                console.error("Error updating identifiers:", error);
+              });
 
             operSummary.submittedResource = newPatient.resource;
             findMatches(
@@ -1604,47 +1710,154 @@ const addPatient = (clientID, patientsBundle, callback) => {
 
             operSummary.internalID.push(counter);
 
-            // update array element with generate HIN for new patients
-            newPatient.resource.identifier = newPatient.resource.identifier.map(
-              (identifier) => {
+            const updateIdentifier = async (identifier) => {
+              if (
+                identifier.system ===
+                config.get("systems:healthInformationNumber:uri")
+              ) {
                 if (
-                  identifier.system ===
-                  config.get("systems:healthInformationNumber:uri")
+                  identifier.value === "null" ||
+                  identifier.value === undefined ||
+                  identifier.value === ""
                 ) {
-                  if (
-                    identifier.value === "null" ||
-                    identifier.value === undefined ||
-                    identifier.value === ""
-                  ) {
-                    operSummary.generatedUniqueIdentifier.push(
-                      generatePatientUniqueIdentifier()
-                    ); // generatePatientUniqueIdentifier()
+                  const query = "_sort=-_lastUpdated&_count=1";
+                  try {
+                    const resource = await new Promise((resolve, reject) => {
+                      fhirWrapper.getResource(
+                        {
+                          resource: "AuditEvent",
+                          query,
+                          noCaching: true,
+                        },
+                        (resource, statusCode) => {
+                          if (statusCode === 200) {
+                            resolve(resource);
+                          } else {
+                            reject(
+                              new Error(
+                                `Failed to fetch resource: ${statusCode}`
+                              )
+                            );
+                          }
+                        }
+                      );
+                    });
 
+                    if (
+                      resource.entry[0] &&
+                      resource.entry[0].resource &&
+                      resource.entry[0].resource.entity &&
+                      resource.entry[0].resource.entity.length > 0
+                    ) {
+                      const internalId = parseInt(
+                        resource.entry[0].resource.entity.find(
+                          (item) => item.name === "InternalID"
+                        ).description
+                      );
+                      const newIdentifier =
+                        generatePatientUniqueIdentifier(internalId);
+                      operSummary.generatedUniqueIdentifier.push(newIdentifier);
+                      return {
+                        ...identifier,
+                        value: newIdentifier,
+                      };
+                    } else if (resource.entry && resource.entry.length === 0) {
+                      const newIdentifier = generatePatientUniqueIdentifier();
+                      operSummary.generatedUniqueIdentifier.push(newIdentifier);
+                      return {
+                        ...identifier,
+                        value: newIdentifier,
+                      };
+                    }
+                  } catch (error) {
+                    console.error("Error updating identifier:", error);
+                    return identifier;
+                  }
+                }
+              } else if (
+                !newPatient.resource.identifier.find(
+                  (id) =>
+                    id.system ===
+                    config.get("systems:healthInformationNumber:uri")
+                )
+              ) {
+                const query = "_sort=-_lastUpdated&_count=1";
+                try {
+                  const resource = await new Promise((resolve, reject) => {
+                    fhirWrapper.getResource(
+                      {
+                        resource: "AuditEvent",
+                        query,
+                        noCaching: true,
+                      },
+                      (resource, statusCode) => {
+                        if (statusCode === 200) {
+                          resolve(resource);
+                        } else {
+                          reject(
+                            new Error(`Failed to fetch resource: ${statusCode}`)
+                          );
+                        }
+                      }
+                    );
+                  });
+
+                  if (
+                    resource.entry[0] &&
+                    resource.entry[0].resource &&
+                    resource.entry[0].resource.entity &&
+                    resource.entry[0].resource.entity.length > 0
+                  ) {
+                    const internalId = parseInt(
+                      resource.entry[0].resource.entity.find(
+                        (item) => item.name === "InternalID"
+                      ).description
+                    );
+                    const newIdentifier =
+                      generatePatientUniqueIdentifier(internalId);
+                    operSummary.generatedUniqueIdentifier.push(newIdentifier);
                     return {
                       ...identifier,
-                      value: generatePatientUniqueIdentifier(),
+                      value: newIdentifier,
+                    };
+                  } else if (resource.entry && resource.entry.length === 0) {
+                    const newIdentifier = generatePatientUniqueIdentifier();
+                    operSummary.generatedUniqueIdentifier.push(newIdentifier);
+                    return {
+                      ...identifier,
+                      value: newIdentifier,
                     };
                   }
-                } else if (
-                  !newPatient.resource.identifier.find(
-                    (id) =>
-                      id.system ===
-                      config.get("systems:healthInformationNumber:uri")
-                  )
-                ) {
-                  operSummary.generatedUniqueIdentifier.push(
-                    generatePatientUniqueIdentifier()
-                  ); // generatePatientUniqueIdentifier()
-
-                  // create a new identifier of HIN
-                  return newPatient.resource.identifier.push({
-                    system: config.get("systems:healthInformationNumber:uri"),
-                    value: generatePatientUniqueIdentifier(),
-                    use: "usual",
-                  });
+                } catch (error) {
+                  console.error("Error updating identifier:", error);
+                  return identifier;
                 }
               }
-            );
+              return identifier;
+            };
+
+            const updateIdentifiers = async () => {
+              const updatedIdentifiers = await Promise.all(
+                newPatient.resource.identifier.map(updateIdentifier)
+              );
+              newPatient.resource.identifier = updatedIdentifiers;
+            };
+
+            // Call the function to update the identifiers
+            updateIdentifiers()
+              .then(() => {
+                logger.info(
+                  "Identifiers updated:",
+                  newPatient.resource.identifier
+                );
+                logger.info(
+                  "Generated Unique Identifiers:",
+                  operSummary.generatedUniqueIdentifier
+                );
+              })
+              .catch((error) => {
+                console.error("Error updating identifiers:", error);
+              });
 
             let adjudTag =
               existingPatient.resource.meta &&

@@ -4,9 +4,7 @@
   "meta": {
     "versionId": "1",
     "lastUpdated": "2022-05-18T09:17:24.098+00:00",
-    "profile": [
-      "http://ihris.org/fhir/StructureDefinition/opencrDisplay"
-    ]
+    "profile": ["http://ihris.org/fhir/StructureDefinition/opencrDisplay"]
   },
   "extension": [
     {
@@ -221,27 +219,6 @@
           "extension": [
             {
               "url": "label",
-              "valueString": "Art Number"
-            },
-            {
-              "url": "fhirpath",
-              "valueString": "identifier.where(system='http://health.go.ug/cr/artnumber').value"
-            },
-            {
-              "url": "searchable",
-              "valueBoolean": true
-            },
-            {
-              "url": "searchparameter",
-              "valueString": "identifier"
-            }
-          ]
-        },
-        {
-          "url": "http://ihris.org/fhir/StructureDefinition/display",
-          "extension": [
-            {
-              "url": "label",
               "valueString": "National ID"
             },
             {
@@ -297,6 +274,27 @@
             {
               "url": "searchparameter",
               "valueString": "identifier"
+            }
+          ]
+        },
+        {
+          "url": "http://ihris.org/fhir/StructureDefinition/display",
+          "extension": [
+            {
+              "url": "label",
+              "valueString": "CRUID"
+            },
+            {
+              "url": "fhirpath",
+              "valueString": "link.where(type='refer').other.reference"
+            },
+            {
+              "url": "searchable",
+              "valueBoolean": true
+            },
+            {
+              "url": "searchparameter",
+              "valueString": "link"
             }
           ]
         }

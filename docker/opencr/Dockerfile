@@ -1,9 +1,9 @@
 FROM node:16-slim
 
 RUN mkdir -p /var/log
-ARG branch=master
+ARG branch=config-payload
 RUN apt-get -qq update && apt-get install -y -qq git && apt-get install -y --no-install-recommends wget
-RUN git clone --branch ${branch} https://github.com/intrahealth/client-registry /src/
+RUN git clone --branch ${branch} https://github.com/jabahum/client-registry /src/
 
 WORKDIR /src/server
 RUN npm install
