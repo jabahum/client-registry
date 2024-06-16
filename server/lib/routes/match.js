@@ -20,6 +20,7 @@ router.post('/resolve-match-issue', async(req, res) => {
   let {resolves, resolvingFrom, removeFlag, flagType} = req.body;
   let query = '';
   let addedToQuery = [];
+
   for(let patient of resolves) {
     let joinedThisCRUID = resolves.find((resolve) => {
       return resolve.uid !== resolve.ouid && resolve.uid === patient.ouid;
@@ -1340,6 +1341,9 @@ router.get('/potential-matches/:id', (req, res) => {
       FHIRConflictsMatches,
       ESMatches
     }) => {
+      if (error) {
+        logger.error("An error occurred"+error);
+      }
       let link = patient.link[0].other.reference;
       let goldenLink = link.split('/')[1];
       const validSystem = generalMixin.getClientIdentifier(patient);
@@ -1373,6 +1377,15 @@ router.get('/potential-matches/:id', (req, res) => {
           }
         }
       }
+
+      let  hin = "";
+      if(patient.identifier) {
+        for(let identifier of patient.identifier) {
+          if(identifier.system === config.get("systems:healthInformationNumber:uri")) {
+            hin = identifier.value;
+          }
+        }
+      }
       
       let primaryPatient = {
         id: patient.id,
@@ -1381,6 +1394,8 @@ router.get('/potential-matches/:id', (req, res) => {
         family: name.family,
         birthDate: patient.birthDate,
         phone,
+        ohin:hin,
+        nhin:hin,
         uid: goldenLink,
         ouid: goldenLink,
         source_id: validSystem.value,
@@ -1510,7 +1525,6 @@ router.get(`/get-match-issues`, (req, res) => {
         link = link.split('/')[1];
       }
 
-
       const validSystem = generalMixin.getClientIdentifier(entry.resource);
 
       let matchTag = entry.resource.meta.tag.find((tag) => {
@@ -1519,12 +1533,22 @@ router.get(`/get-match-issues`, (req, res) => {
       let clientsTag = entry.resource.meta.tag.find((tag) => {
         return tag.system === clientIDURI;
       });
+
+      let  hin = "";
+      if(entry.resource.identifier) {
+        for(let identifier of entry.resource.identifier) {
+          if(identifier.system === config.get("systems:healthInformationNumber:uri")) {
+            hin = identifier.value;
+          }
+        }
+      }
       let review = {
         id: entry.resource.id,
         gender: entry.resource.gender,
         family: name.family,
         given,
         birthDate: entry.resource.birthDate,
+        hin: hin,
         uid: link,
         source: clientsTag.code,
         source_id: validSystem.value,
@@ -1569,12 +1593,22 @@ router.get(`/get-new-auto-matches`, (req, res) => {
       let clientsTag = entry.resource.meta.tag.find((tag) => {
         return tag.system === clientIDURI;
       });
+
+      let  hin = "";
+      if(entry.resource.identifier) {
+        for(let identifier of entry.resource.identifier) {
+          if(identifier.system === config.get("systems:healthInformationNumber:uri")) {
+            hin = identifier.value;
+          }
+        }
+      }
       let review = {
         id: entry.resource.id,
         gender: entry.resource.gender,
         family: name.family,
         given,
         birthDate: entry.resource.birthDate,
+        hin: hin,
         uid: link,
         source: clientsTag.code,
         source_id: validSystem.value,
